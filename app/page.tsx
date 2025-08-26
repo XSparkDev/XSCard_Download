@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Smartphone, Users, Zap, Shield, Globe, Star, RefreshCw, User, Monitor, Tablet } from "lucide-react"
+import { CurrencySelector } from "@/components/ui/currency-selector"
+import { type Currency, convertPrice, formatPrice } from "@/lib/currency"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import emailjs from "@emailjs/browser"
@@ -121,6 +123,9 @@ export default function HomePage() {
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  
+  // Currency state
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>("USD")
   
   // Download captcha state
   const [isDownloadCaptchaVerified, setIsDownloadCaptchaVerified] = useState(false)
@@ -876,9 +881,15 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Pricing Plans</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Choose the perfect plan for your business needs. All prices are exclusive of VAT.
             </p>
+            <div className="flex justify-center">
+              <CurrencySelector
+                selectedCurrency={selectedCurrency}
+                onCurrencyChange={setSelectedCurrency}
+              />
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -887,7 +898,9 @@ export default function HomePage() {
               <CardContent className="p-8">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Free Plan</h3>
-                  <div className="text-4xl font-bold text-gray-900 mb-1">R0.00</div>
+                  <div className="text-4xl font-bold text-gray-900 mb-1">
+                    {formatPrice(convertPrice(0, "ZAR", selectedCurrency), selectedCurrency)}
+                  </div>
                   <div className="text-gray-600">/month</div>
                 </div>
                 <ul className="space-y-3 mb-8">
@@ -935,9 +948,13 @@ export default function HomePage() {
               <CardContent className="p-8">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Plan</h3>
-                  <div className="text-4xl font-bold text-gray-900 mb-1">R159.99</div>
+                  <div className="text-4xl font-bold text-gray-900 mb-1">
+                    {formatPrice(convertPrice(159.99, "ZAR", selectedCurrency), selectedCurrency)}
+                  </div>
                   <div className="text-gray-600">/user/month</div>
-                  <div className="text-sm text-purple-600 mt-1">R1,800/year (Save R120 with annual billing)</div>
+                  <div className="text-sm text-purple-600 mt-1">
+                    {formatPrice(convertPrice(1800, "ZAR", selectedCurrency), selectedCurrency)}/year (Save {formatPrice(convertPrice(120, "ZAR", selectedCurrency), selectedCurrency)} with annual billing)
+                  </div>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-start">
@@ -1041,13 +1058,13 @@ export default function HomePage() {
               <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
                 <div className="space-y-2">
                   <p>• All prices are exclusive of VAT</p>
-                  <p>• Secure payment through SA banks</p>
+                  <p>• Secure payment through {selectedCurrency === "ZAR" ? "SA banks" : "international payment gateways"}</p>
                   <p>• Monthly plans can be cancelled anytime</p>
                   <p>• Annual plans offer significant savings</p>
                 </div>
                 <div className="space-y-2">
                   <p>• All paid plans include 7-day free trial</p>
-                  <p>• Local billing in ZAR</p>
+                  <p>• Billing in {selectedCurrency}</p>
                   <p>• POPIA compliant</p>
                   <p>• Full mobile app access included</p>
                 </div>

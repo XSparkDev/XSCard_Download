@@ -400,7 +400,7 @@ export const PremiumAuthModal: React.FC<PremiumAuthModalProps> = ({
                   required
                   value={cardData.accountHolderName}
                   onChange={(e) => setCardData({ ...cardData, accountHolderName: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-white placeholder-gray-400"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
                   placeholder="Name on bank account"
                   disabled={isSubmitting}
                 />
@@ -417,7 +417,7 @@ export const PremiumAuthModal: React.FC<PremiumAuthModalProps> = ({
                   required
                   value={cardData.accountNumber}
                   onChange={(e) => setCardData({ ...cardData, accountNumber: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-white placeholder-gray-400"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
                   placeholder="Enter account number"
                   disabled={isSubmitting}
                 />
@@ -435,7 +435,7 @@ export const PremiumAuthModal: React.FC<PremiumAuthModalProps> = ({
                     required
                     value={cardData.bankCode}
                     onChange={(e) => setCardData({ ...cardData, bankCode: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
                     placeholder="e.g., 632005"
                     disabled={isSubmitting}
                   />
@@ -451,7 +451,7 @@ export const PremiumAuthModal: React.FC<PremiumAuthModalProps> = ({
                     required
                     value={cardData.bankName}
                     onChange={(e) => setCardData({ ...cardData, bankName: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
                     placeholder="e.g., Standard Bank"
                     disabled={isSubmitting}
                   />
@@ -469,7 +469,7 @@ export const PremiumAuthModal: React.FC<PremiumAuthModalProps> = ({
                   required
                   value={cardData.billingAddress}
                   onChange={(e) => setCardData({ ...cardData, billingAddress: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-white placeholder-gray-400"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
                   placeholder="Street address"
                   disabled={isSubmitting}
                 />
@@ -487,7 +487,7 @@ export const PremiumAuthModal: React.FC<PremiumAuthModalProps> = ({
                     required
                     value={cardData.city}
                     onChange={(e) => setCardData({ ...cardData, city: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
                     placeholder="City"
                     disabled={isSubmitting}
                   />
@@ -503,7 +503,7 @@ export const PremiumAuthModal: React.FC<PremiumAuthModalProps> = ({
                     required
                     value={cardData.postalCode}
                     onChange={(e) => setCardData({ ...cardData, postalCode: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
                     placeholder="12345"
                     disabled={isSubmitting}
                   />
