@@ -554,6 +554,19 @@ export default function TermsPage() {
                 <p className="text-white/80 mb-6">
                   <strong>6.7.</strong> This clause will survive the termination or expiry of your Membership.
                 </p>
+                <p className="text-white/80 mb-4">
+                  <strong>6.8.</strong> Account Deactivation and Deletion
+                </p>
+                <p className="text-white/80 mb-4">
+                  You may deactivate your account at any time via the Platform. Deactivation will suspend access to your account but your data will remain in our system for compliance, audit, and security purposes.
+                </p>
+                <p className="text-white/80 mb-4">
+                  You may also request permanent deletion of your personal data by contacting us through the Platform or via email at <a href="mailto:support@xscard.co.za" className="text-blue-400 hover:text-blue-300 underline">support@xscard.co.za</a>. We will process deletion requests within 30 days, and you will receive confirmation once your data has been removed. Please note that:
+                </p>
+                <ul className="text-white/80 mb-4 list-disc list-inside space-y-2 ml-6">
+                  <li>Certain records (including financial transactions, payment information, and audit logs) may be retained for up to 7 years as required by South African law (Companies Act, Income Tax Act, FICA) and other applicable regulations.</li>
+                  <li>After this period, data will either be securely deleted or anonymised.</li>
+                </ul>
 
                 <h3 className="text-xl font-bold text-white mb-4">7. Warranties</h3>
                 <p className="text-white/80 mb-4">
@@ -634,8 +647,14 @@ export default function TermsPage() {
                 <p className="text-white/80 mb-4">
                   <strong>13.1.</strong> We are committed to protecting your privacy. Our collection and use of personal data are governed by the Protection of Personal Information Act, 2013 (POPIA).
                 </p>
-                <p className="text-white/80 mb-6">
+                <p className="text-white/80 mb-4">
                   <strong>13.2.</strong> For more information on how we collect, use, and protect your personal information, please refer to our Privacy Policy available on our website.
+                </p>
+                <p className="text-white/80 mb-6">
+                  <strong>13.3.</strong> Account Control
+                </p>
+                <p className="text-white/80 mb-6">
+                  In accordance with POPIA, you have the right to request access to, correction of, or deletion of your personal information. We provide in-app tools for account deactivation and support channels for permanent account deletion requests.
                 </p>
 
                 <h3 className="text-xl font-bold text-white mb-4">14. Changes to Terms</h3>
@@ -677,7 +696,7 @@ export default function TermsPage() {
 
                 <h3 className="text-xl font-bold text-white mb-4">Contacting us</h3>
                 <p className="text-white/80 mb-4">
-                  If you would like to contact us to understand more about these Terms or wish to contact us concerning any matter relating to our Platform and your use of it, you may send an email to support@xscard.co.za
+                  If you would like to contact us to understand more about these Terms or wish to contact us concerning any matter relating to our Platform and your use of it, you may send an email to <a href="mailto:support@xscard.co.za" className="text-blue-400 hover:text-blue-300 underline">support@xscard.co.za</a>
                 </p>
                 <p className="text-white/60 text-sm">
                   These terms were last updated on February 21, 2025.
