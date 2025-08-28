@@ -25,7 +25,7 @@ export const currencies: CurrencyOption[] = [
 // Exchange rates (you can update these or fetch from an API)
 const EXCHANGE_RATES = {
   ZAR: 1,
-  USD: 0.075 // 1 ZAR = 0.075 USD (approximately)
+  USD: 0.067 // 1 ZAR = 0.067 USD (approximately)
 }
 
 export function convertPrice(price: number, fromCurrency: Currency, toCurrency: Currency): number {
