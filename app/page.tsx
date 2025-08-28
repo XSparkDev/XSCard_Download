@@ -949,11 +949,11 @@ export default function HomePage() {
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Plan</h3>
                   <div className="text-4xl font-bold text-gray-900 mb-1">
-                    {formatPrice(convertPrice(160.00, "ZAR", selectedCurrency), selectedCurrency)}
+                    {selectedCurrency === "USD" ? "$12.00" : "R159.99"}
                   </div>
                   <div className="text-gray-600">/user/month</div>
                   <div className="text-sm text-purple-600 mt-1">
-                    {formatPrice(convertPrice(1600, "ZAR", selectedCurrency), selectedCurrency)}/year (Save {formatPrice(convertPrice(120, "ZAR", selectedCurrency), selectedCurrency)} with annual billing)
+                    {selectedCurrency === "USD" ? "$120.00" : "R1,800"}/year (Save {selectedCurrency === "USD" ? "$24.00" : "R120"} with annual billing)
                   </div>
                 </div>
                 <ul className="space-y-3 mb-8">
