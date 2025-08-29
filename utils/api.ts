@@ -77,8 +77,8 @@ const getApiBaseUrl = (): string => {
         hostname.includes('staging.')) {
       console.log('🔍 DEBUG: API Config - Using production backend (local development)');
       // Use production backend for local development
-     //return 'http://localhost:8383';
-     return 'https://xscard-app-8ign.onrender.com';
+     return 'http://localhost:8383';
+     //return 'https://xscard-app-8ign.onrender.com';
     }
   }
   

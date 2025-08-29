@@ -18,6 +18,7 @@ import {
   Shield,
   Menu,
   X,
+  History,
 } from "lucide-react"
 import Image from "next/image"
 import { useState, useEffect } from "react"
@@ -40,6 +41,20 @@ interface CustomerRequest {
   message: string;
   date: string;
   status: "pending" | "responded";
+  statusHistory?: Array<{
+    status: string;
+    timestamp: string | {
+      _seconds: number;
+      _nanoseconds: number;
+    };
+    updatedBy: string;
+    notes: string;
+    response: string;
+    admin?: {
+      id: string;
+      email: string;
+    };
+  }>;
 }
 
 export default function AdminDashboard() {
@@ -69,6 +84,8 @@ export default function AdminDashboard() {
     opacity: '0'
   })
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
+  const [showMessageTrail, setShowMessageTrail] = useState<CustomerRequest | null>(null)
+  const [isResponding, setIsResponding] = useState(false)
   
   // Authentication and domain restriction check
   useEffect(() => {
@@ -398,16 +415,47 @@ export default function AdminDashboard() {
       return
     }
     
+    setIsResponding(true)
+    
+    // Create the new response entry
+    const newResponse = {
+      status: "responded" as const,
+      response: responseText.trim(),
+      notes: "Response sent via admin dashboard",
+      timestamp: new Date().toISOString(),
+      updatedBy: auth.currentUser?.uid || "",
+      admin: {
+        id: auth.currentUser?.uid || "",
+        email: auth.currentUser?.email || ""
+      }
+    }
+
+    // Optimistically update the UI
+    setRequests((prev) => prev.map((req) => 
+      req.id === requestId ? { 
+        ...req, 
+        status: "responded" as const,
+        statusHistory: [...(req.statusHistory || []), newResponse]
+      } : req
+    ))
+
+    // Update message trail if it's open
+    if (showMessageTrail && showMessageTrail.id === requestId) {
+      setShowMessageTrail((prev) => prev ? {
+        ...prev,
+        status: "responded" as const,
+        statusHistory: [...(prev.statusHistory || []), newResponse]
+      } : null)
+    }
+
+    // Clear the response text immediately
+    const currentResponseText = responseText
+    setResponseText("")
+    
     try {
       const user = auth.currentUser
       if (!user) {
-        setError('User not authenticated')
-        toast({
-          title: "Authentication Error",
-          description: "Please log in again to send responses.",
-          variant: "destructive",
-        })
-        return
+        throw new Error('User not authenticated')
       }
 
       const idToken = await user.getIdToken()
@@ -421,7 +469,7 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({
           status: "responded",
-          response: responseText.trim(),
+          response: currentResponseText.trim(),
           notes: "Response sent via admin dashboard"
         })
       })
@@ -433,27 +481,36 @@ export default function AdminDashboard() {
 
       const result = await response.json()
       
-      if (result.success) {
-        // Update local state to reflect the change
-        setRequests((prev) => prev.map((req) => 
-          req.id === requestId ? { ...req, status: "responded" as const } : req
-        ))
-        
-        setSelectedRequest(null)
-        setResponseText("")
-        
-        // Show success toast
-        toast({
-          title: "Response Sent Successfully!",
-          description: "Your response has been sent to the customer.",
-          variant: "default",
-        })
-      } else {
+      if (!result.success) {
         throw new Error(result.message || 'Failed to send response')
       }
+
+      // Close modals
+      setSelectedRequest(null)
+      
     } catch (error) {
       console.error('Error responding to request:', error)
-      setError(error instanceof Error ? error.message : 'Failed to send response')
+      
+      // Revert the optimistic update
+      setRequests((prev) => prev.map((req) => 
+        req.id === requestId ? { 
+          ...req, 
+          status: req.statusHistory && req.statusHistory.length > 0 ? "responded" as const : "pending" as const,
+          statusHistory: req.statusHistory?.slice(0, -1) || []
+        } : req
+      ))
+
+      // Revert message trail if it's open
+      if (showMessageTrail && showMessageTrail.id === requestId) {
+        setShowMessageTrail((prev) => prev ? {
+          ...prev,
+          status: prev.statusHistory && prev.statusHistory.length > 1 ? "responded" as const : "pending" as const,
+          statusHistory: prev.statusHistory?.slice(0, -1) || []
+        } : null)
+      }
+
+      // Restore the response text
+      setResponseText(currentResponseText)
       
       // Show error toast
       toast({
@@ -461,6 +518,8 @@ export default function AdminDashboard() {
         description: error instanceof Error ? error.message : 'An unexpected error occurred.',
         variant: "destructive",
       })
+    } finally {
+      setIsResponding(false)
     }
   }
 
@@ -536,6 +595,39 @@ export default function AdminDashboard() {
         </div>
       )
     })
+  }
+
+  // Function to format timestamp
+  const formatTimestamp = (timestamp: string | { _seconds: number; _nanoseconds: number }) => {
+    if (typeof timestamp === 'string') {
+      // Parse the string timestamp and format it
+      const date = new Date(timestamp)
+      return {
+        date: date.toLocaleDateString('en-US', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }),
+        time: date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        })
+      }
+    }
+    const date = new Date(timestamp._seconds * 1000)
+    return {
+      date: date.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      }),
+      time: date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+    }
   }
 
   const handleFilterChange = (filterType: 'type' | 'status', value: string) => {
@@ -622,6 +714,11 @@ export default function AdminDashboard() {
       // Fallback to center if no event
       setModalPosition({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', scale: '1', opacity: '1' })
     }
+  }
+
+  // Function to open message trail modal
+  const openMessageTrail = (request: CustomerRequest) => {
+    setShowMessageTrail(request)
   }
 
   // Test backend connection
@@ -1019,6 +1116,19 @@ export default function AdminDashboard() {
                                             <Reply className="w-4 h-4 mr-2" />
                                             Respond
                                           </Button>
+                                          <Button
+                                            size="sm"
+                                            onClick={() => openMessageTrail(request)}
+                                            disabled={!request.statusHistory || request.statusHistory.length === 0}
+                                            className={`font-medium shadow-lg transition-all duration-300 w-full sm:w-auto ${
+                                              request.statusHistory && request.statusHistory.length > 0
+                                                ? 'bg-purple-600 hover:bg-purple-700 text-white hover:shadow-xl'
+                                                : 'bg-gray-500 text-white/50 cursor-not-allowed'
+                                            }`}
+                                          >
+                                            <History className="w-4 h-4 mr-2" />
+                                            Message Trail
+                                          </Button>
                                         </div>
                                       </div>
                                     </div>
@@ -1071,7 +1181,7 @@ export default function AdminDashboard() {
                                   <Button
                                     size="sm"
                                           onClick={() => toggleExpanded(request.id)}
-                                          className="bg-transparent border border-white/60 text-white hover:bg-white/20 hover:border-white/80 font-medium w-full sm:w-auto order-2 sm:order-1"
+                                          className="bg-transparent border border-white/60 text-white hover:bg-white/20 hover:border-white/80 font-medium w-full sm:w-auto order-3 sm:order-1"
                                         >
                                           <X className="w-4 h-4 mr-2" />
                                           Collapse
@@ -1083,6 +1193,19 @@ export default function AdminDashboard() {
                                   >
                                     <Reply className="w-4 h-4 mr-2" />
                                           Respond
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => openMessageTrail(request)}
+                                    disabled={!request.statusHistory || request.statusHistory.length === 0}
+                                    className={`font-medium shadow-lg transition-all duration-300 w-full sm:w-auto order-2 sm:order-3 ${
+                                      request.statusHistory && request.statusHistory.length > 0
+                                        ? 'bg-purple-600 hover:bg-purple-700 text-white hover:shadow-xl'
+                                        : 'bg-gray-500 text-white/50 cursor-not-allowed'
+                                    }`}
+                                  >
+                                    <History className="w-4 h-4 mr-2" />
+                                    Message Trail
                                   </Button>
                                 </div>
                               </div>
@@ -1178,20 +1301,151 @@ export default function AdminDashboard() {
                                 placeholder="Type your response..."
                               />
                             </div>
-                            <div className="flex space-x-3">
-                              <Button
-                                onClick={() => handleResponse(selectedRequest.id)}
-                                disabled={!responseText.trim()}
-                                className="flex-1 bg-custom-btn-gradient hover:opacity-90 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300"
-                              >
-                                Send Response
-                              </Button>
-                              <Button
-                                onClick={() => setSelectedRequest(null)}
-                                className="flex-1 bg-transparent border border-white/60 text-white hover:bg-white/20 hover:border-white/80 font-medium"
-                              >
-                                Cancel
-                              </Button>
+                                                          <div className="flex space-x-3">
+                                <Button
+                                  onClick={() => handleResponse(selectedRequest.id)}
+                                  disabled={!responseText.trim() || isResponding}
+                                  className="flex-1 bg-custom-btn-gradient hover:opacity-90 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                  {isResponding ? (
+                                    <div className="flex items-center space-x-2">
+                                      <RefreshCw className="w-4 h-4 animate-spin" />
+                                      <span>Sending...</span>
+                                    </div>
+                                  ) : (
+                                    "Send Response"
+                                  )}
+                                </Button>
+                                <Button
+                                  onClick={() => setSelectedRequest(null)}
+                                  disabled={isResponding}
+                                  className="flex-1 bg-transparent border border-white/60 text-white hover:bg-white/20 hover:border-white/80 font-medium"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Message Trail Modal */}
+                    {showMessageTrail && (
+                      <div className="fixed inset-0 z-[100] overflow-hidden">
+                        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowMessageTrail(null)}></div>
+                        <div 
+                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/25 backdrop-blur-lg border border-white/30 rounded-2xl p-6 max-w-2xl w-full h-[600px] shadow-2xl flex flex-col"
+                          role="dialog"
+                          aria-modal="true"
+                          aria-labelledby="message-trail-title"
+                        >
+                          {/* Header */}
+                          <div className="flex items-center justify-between mb-4 flex-shrink-0">
+                            <div>
+                              <h3 id="message-trail-title" className="text-xl font-bold text-white">Message Trail</h3>
+                              <p className="text-white/70 text-sm mt-1">{showMessageTrail.name} - {showMessageTrail.email}</p>
+                            </div>
+                            <button
+                              onClick={() => setShowMessageTrail(null)}
+                              className="text-white/70 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+                              aria-label="Close modal"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+                          </div>
+                          
+                          {/* Scrollable Content */}
+                          <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-0">
+                            {/* Responses */}
+                            {showMessageTrail.statusHistory && showMessageTrail.statusHistory.length > 0 ? (
+                              showMessageTrail.statusHistory.map((entry, index) => (
+                                <div key={index} className="bg-white/10 rounded-lg p-4 border border-white/20">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center space-x-2">
+                                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(entry.status)}`}>
+                                        {entry.status}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Date, Time and Admin */}
+                                  <div className="flex items-center justify-between mb-3">
+                                    {(() => {
+                                      const timestamp = formatTimestamp(entry.timestamp)
+                                      return (
+                                        <div className="text-white/60 text-xs space-y-1">
+                                          <div>Time: {timestamp.time}</div>
+                                          <div>Date: {timestamp.date}</div>
+                                        </div>
+                                      )
+                                    })()}
+                                    {entry.admin && (
+                                      <div className="text-right text-white/60 text-xs">
+                                        <div>by: <span className="text-purple-300 font-medium">
+                                          <a 
+                                            href={`mailto:${entry.admin.email}`}
+                                            className="hover:text-purple-200 hover:underline transition-colors"
+                                            title={`Send email to ${entry.admin.email}`}
+                                          >
+                                            {entry.admin.email}
+                                          </a>
+                                        </span></div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  {entry.response && (
+                                    <div className="text-white/90 text-sm bg-white/5 rounded p-3 border-l-2 border-purple-400">
+                                      {entry.response}
+                                    </div>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center py-8">
+                                <History className="w-12 h-12 text-white/40 mx-auto mb-4" />
+                                <p className="text-white/60">No responses available</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Add Response Section */}
+                          <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
+                            <div className="space-y-3">
+                              <label className="block text-sm font-medium text-white">Add Response</label>
+                              <textarea
+                                value={responseText}
+                                onChange={(e) => setResponseText(e.target.value)}
+                                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 resize-none"
+                                rows={3}
+                                placeholder="Type your response..."
+                              />
+                              <div className="flex space-x-3">
+                                <Button
+                                  onClick={() => handleResponse(showMessageTrail.id)}
+                                  disabled={!responseText.trim() || isResponding}
+                                  className="flex-1 bg-custom-btn-gradient hover:opacity-90 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                  {isResponding ? (
+                                    <div className="flex items-center space-x-2">
+                                      <RefreshCw className="w-4 h-4 animate-spin" />
+                                      <span>Sending...</span>
+                                    </div>
+                                  ) : (
+                                    "Send Response"
+                                  )}
+                                </Button>
+                                <Button
+                                  onClick={() => {
+                                    setResponseText("")
+                                    setShowMessageTrail(null)
+                                  }}
+                                  disabled={isResponding}
+                                  className="flex-1 bg-transparent border border-white/60 text-white hover:bg-white/20 hover:border-white/80 font-medium"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
